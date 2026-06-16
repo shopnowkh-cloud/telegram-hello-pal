@@ -138,7 +138,7 @@ export async function sendPhoto(
     for (const [k, v] of Object.entries(flat)) {
       form.append(k, typeof v === "string" ? v : JSON.stringify(v));
     }
-    form.append("photo", new Blob([photo], { type: "image/png" }), "qr.png");
+    form.append("photo", new Blob([photo as BlobPart], { type: "image/png" }), "qr.png");
     const res = await fetch(`${GATEWAY_URL}/sendPhoto`, {
       method: "POST",
       headers: headers(),
@@ -171,7 +171,7 @@ export async function sendDocument(
     }
     form.append(
       "document",
-      new Blob([bytes], { type: "application/octet-stream" }),
+      new Blob([bytes as BlobPart], { type: "application/octet-stream" }),
       filename,
     );
     const res = await fetch(`${GATEWAY_URL}/sendDocument`, {
