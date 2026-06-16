@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createHash, timingSafeEqual } from "crypto";
+import { handleUpdate } from "@/lib/telegram/handler";
 
 function deriveSecret(key: string) {
   return createHash("sha256").update(`telegram-webhook:${key}`).digest("base64url");
@@ -9,23 +10,6 @@ function safeEqual(a: string, b: string) {
   const left = Buffer.from(a);
   const right = Buffer.from(b);
   return left.length === right.length && timingSafeEqual(left, right);
-}
-
-const GATEWAY_URL = "https://connector-gateway.lovable.dev/telegram";
-
-async function sendMessage(chatId: number, text: string) {
-  const res = await fetch(`${GATEWAY_URL}/sendMessage`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${process.env.LOVABLE_API_KEY}`,
-      "X-Connection-Api-Key": process.env.TELEGRAM_API_KEY!,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ chat_id: chatId, text }),
-  });
-  if (!res.ok) {
-    console.error("sendMessage failed", res.status, await res.text());
-  }
 }
 
 export const Route = createFileRoute("/api/public/telegram/webhook")({
@@ -42,11 +26,12 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
         }
 
         const update = await request.json();
-        const message = update.message ?? update.edited_message;
-        const chatId = message?.chat?.id;
-        if (chatId) {
-          await sendMessage(chatId, "hi");
+        try {
+          await handleUpdate(update);
+        } catch (e) {
+          console.error("[webhook] handleUpdate error:", e);
         }
+        // Always return 200 so Telegram doesn't retry indefinitely.
         return Response.json({ ok: true });
       },
     },
