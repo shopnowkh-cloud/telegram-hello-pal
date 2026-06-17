@@ -214,6 +214,7 @@ async function camboRequest(env: Env, params: Record<string, string | number>) {
 }
 
 async function generatePlainQR(qr_string: string): Promise<Uint8Array> {
+  const { default: QRCode } = await import("qrcode");
   const buf = await QRCode.toBuffer(qr_string, {
     errorCorrectionLevel: "M",
     width: 400,
