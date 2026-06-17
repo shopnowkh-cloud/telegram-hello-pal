@@ -4,7 +4,7 @@
  * runs the handlers, then persists state.
  */
 import crypto from "crypto";
-import QRCode from "qrcode";
+// qrcode is loaded lazily inside generatePlainQR to keep the worker module load light
 import {
   loadState,
   saveState,
