@@ -214,14 +214,13 @@ async function camboRequest(env: Env, params: Record<string, string | number>) {
 }
 
 async function generatePlainQR(qr_string: string): Promise<Uint8Array> {
-  const { default: QRCode } = await import("qrcode");
-  const buf = await QRCode.toBuffer(qr_string, {
-    errorCorrectionLevel: "M",
-    width: 400,
-    margin: 3,
-    color: { dark: "#000000", light: "#ffffff" },
-  });
-  return new Uint8Array(buf);
+  // Cloudflare Worker–safe: fetch a PNG from a public QR service.
+  const url =
+    "https://api.qrserver.com/v1/create-qr-code/?size=400x400&margin=12&ecc=M&data=" +
+    encodeURIComponent(qr_string);
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`QR service HTTP ${res.status}`);
+  return new Uint8Array(await res.arrayBuffer());
 }
 
 async function createKhpayPayment(env: Env, amount: number) {
