@@ -1287,13 +1287,21 @@ async function exportBuyers(env: Env, chatId: number) {
     `buyers_${nowKHFile()}.txt`,
     `📋 របាយការណ៍ទិញ — ${Object.keys(grouped).length} អ្នក​ទិញ`,
   );
-  return sendAdminSettingsMenu(chatId);
+  await sendMessage(
+    chatId,
+    "📋 <b>របាយការណ៍ទិញ</b>\n\nចុច <b>➕ បន្ថែម គូប៉ុង User</b> ដើម្បីភ្ជាប់ email/code ទៅ User សម្រាប់ទទួល SMS E-GetS",
+    BUYERS_SUBMENU_KB,
+  );
 }
 
 async function showUsersList(env: Env, chatId: number) {
   const rows = Object.entries(env.state.users);
   if (!rows.length)
-    return sendMessage(chatId, "📭 <b>មិនទាន់មានអ្នកប្រើប្រាស់ទេ។</b>", BACK_SETTINGS_KB);
+    return sendMessage(
+      chatId,
+      "📭 <b>មិនទាន់មានអ្នកប្រើប្រាស់ទេ។</b>\n\nចុច <b>➕ បន្ថែម User</b> ដើម្បីបន្ថែមដោយដៃ",
+      USERS_SUBMENU_KB,
+    );
   const lines: string[] = [`👥 អ្នកប្រើប្រាស់សរុប: ${rows.length}`, ""];
   for (const [uid, info] of rows) {
     const full = [info.first_name, info.last_name].filter(Boolean).join(" ") || "N/A";
@@ -1307,7 +1315,11 @@ async function showUsersList(env: Env, chatId: number) {
     `users_${nowKHFile()}.txt`,
     `👥 បញ្ជីអ្នកប្រើប្រាស់ — ${rows.length} នាក់`,
   );
-  return sendAdminSettingsMenu(chatId);
+  return sendMessage(
+    chatId,
+    "ចុច <b>➕ បន្ថែម User</b> ដើម្បីបន្ថែម User ថ្មីសម្រាប់ផ្សាយ",
+    USERS_SUBMENU_KB,
+  );
 }
 
 async function sendKhpayInfo(env: Env, chatId: number) {
