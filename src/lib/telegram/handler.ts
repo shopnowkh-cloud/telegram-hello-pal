@@ -1014,10 +1014,13 @@ async function dispatchAdminButton(env: Env, chatId: number, uid: number, btn: s
         CANCEL_INPUT_KB,
       );
     case BTN_BUY_VIDEO: {
-      const cur = env.state.settings.BUY_VIDEO_URL || "(មិនទាន់កំណត់)";
+      const list = getBuyVideos(env);
+      const summary = list.length
+        ? list.map((v, i) => `${i + 1}. <code>${esc(v.slice(0, 60))}${v.length > 60 ? "…" : ""}</code>`).join("\n")
+        : "(មិនទាន់កំណត់)";
       return sendMessage(
         chatId,
-        `🎬 <b>វីដេអូ /buy បច្ចុប្បន្ន៖</b>\n<code>${esc(cur)}</code>`,
+        `🎬 <b>វីដេអូ /buy បច្ចុប្បន្ន (${list.length})៖</b>\n${summary}`,
         VIDEO_SUBMENU_KB,
       );
     }
@@ -1025,12 +1028,13 @@ async function dispatchAdminButton(env: Env, chatId: number, uid: number, btn: s
       env.state.sessions[String(uid)] = { state: "admin_input:buy_video" };
       return sendMessage(
         chatId,
-        "🎬 សូមផ្ញើ <b>URL វីដេអូ</b> ឬ <b>file_id</b> ថ្មី:\n\n<i>ចុច 🚫 បោះបង់ ដើម្បីបោះបង់</i>",
+        "🎬 សូម​ផ្ញើ <b>វីដេអូ</b> (upload) ឬ <b>URL</b> / <b>file_id</b> ដើម្បី​បន្ថែម​ចូល​បញ្ជី។\n\n<i>អាច​ផ្ញើ​បាន​ច្រើន​ដង​ជាប់​គ្នា។ ចុច 🚫 បោះបង់ ពេល​ចប់</i>",
         CANCEL_INPUT_KB,
       );
     case BTN_VIDEO_CLEAR:
-      env.state.settings.BUY_VIDEO_URL = "";
-      return sendMessage(chatId, "✅ បានលុបវីដេអូ /buy", ADMIN_SETTINGS_KB);
+      setBuyVideos(env, []);
+      return sendMessage(chatId, "✅ បានលុបវីដេអូ /buy ទាំងអស់", ADMIN_SETTINGS_KB);
+
     case BTN_USER_ADD:
       env.state.sessions[String(uid)] = { state: "admin_input:user_add" };
       return sendMessage(
