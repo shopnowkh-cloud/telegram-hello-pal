@@ -54,6 +54,7 @@ const BTN_CHANNEL = "📢 Channel ID";
 const BTN_ADMINS = "👑 គ្រប់គ្រង Admin";
 const BTN_MAINTENANCE = "🛠 Maintenance Mode";
 const BTN_BROADCAST = "📢 ផ្សាយព័ត៌មាន";
+const BTN_BUY_VIDEO = "🎬 វីដេអូ /buy";
 const BTN_BACK_SETTINGS = "⬅️";
 const BTN_KHPAY_KEY_EDIT = "✏️ ប្តូរ KhPay API Key";
 const BTN_KHPAY_INFO = "📊 ព័ត៌មាន KhPay";
@@ -68,15 +69,21 @@ const BTN_DELETE_CONFIRM = "✅ បញ្ជាក់លុប";
 const BTN_DELETE_CANCEL = "🚫 បោះបង់ការលុប";
 const BTN_BROADCAST_CONFIRM = "✅ បញ្ជាក់ផ្សាយ";
 const BTN_BROADCAST_CANCEL = "🚫 បោះបង់ការផ្សាយ";
+const BTN_USER_ADD = "➕ បន្ថែម User";
+const BTN_PURCHASE_ADD = "➕ បន្ថែម គូប៉ុង User";
+const BTN_VIDEO_EDIT = "✏️ ប្តូរ វីដេអូ";
+const BTN_VIDEO_CLEAR = "🗑 លុប វីដេអូ";
 const ADMIN_SETTINGS_BTN = "/settings";
 
 const ADMIN_BUTTON_LABELS = new Set([
   BTN_ADD_ACCOUNT, BTN_DELETE_TYPE, BTN_STOCK, BTN_USERS, BTN_BUYERS,
   BTN_KHPAY, BTN_CHANNEL, BTN_ADMINS, BTN_MAINTENANCE, BTN_BROADCAST,
+  BTN_BUY_VIDEO,
   BTN_BACK_SETTINGS, BTN_KHPAY_KEY_EDIT, BTN_KHPAY_INFO,
   BTN_CHANNEL_EDIT, BTN_CHANNEL_CLEAR, BTN_ADMIN_ADD, BTN_ADMIN_REMOVE,
   BTN_MAINT_ON, BTN_MAINT_OFF, BTN_CANCEL_INPUT,
   BTN_DELETE_CONFIRM, BTN_DELETE_CANCEL, BTN_BROADCAST_CONFIRM, BTN_BROADCAST_CANCEL,
+  BTN_USER_ADD, BTN_PURCHASE_ADD, BTN_VIDEO_EDIT, BTN_VIDEO_CLEAR,
   ADMIN_SETTINGS_BTN,
 ]);
 
@@ -89,7 +96,8 @@ const ADMIN_SETTINGS_KB = {
       [{ text: BTN_STOCK }, { text: BTN_BUYERS }],
       [{ text: BTN_USERS }, { text: BTN_KHPAY }],
       [{ text: BTN_CHANNEL }, { text: BTN_ADMINS }],
-      [{ text: BTN_BROADCAST }, { text: BTN_MAINTENANCE }],
+      [{ text: BTN_BROADCAST }, { text: BTN_BUY_VIDEO }],
+      [{ text: BTN_MAINTENANCE }],
     ],
     resize_keyboard: true,
     is_persistent: true,
