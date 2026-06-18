@@ -515,20 +515,41 @@ async function handleCommand(env: Env, msg: any) {
     if (env.maintenance && !isAdmin(env, uid)) {
       return sendMessage(chatId, "🔧 <b>Bot កំពុង Update សូមរង់ចាំមួយភ្លែត...</b>");
     }
-    const videoUrl = env.state.settings.BUY_VIDEO_URL || "";
-    if (videoUrl) {
-      const sent = await sendVideo(chatId, videoUrl, {
-        caption: "🎬 <b>របៀបទិញគូប៉ុង</b>",
+    const videos = getBuyVideos(env);
+    if (videos.length === 0) {
+      await sendMessage(chatId, "ℹ️ មិនទាន់មានវីដេអូ /buy ត្រូវបានកំណត់ទេ");
+      return;
+    }
+    for (let i = 0; i < videos.length; i++) {
+      const v = videos[i];
+      const sent = await sendVideo(chatId, v, {
+        caption: i === 0 ? "🎬 <b>របៀបទិញគូប៉ុង</b>" : undefined,
       });
       if (!sent) {
-        await sendMessage(chatId, `🎬 <b>របៀបទិញគូប៉ុង</b>\n\n${esc(videoUrl)}`);
+        await sendMessage(chatId, `🎬 ${esc(v)}`);
       }
-    } else {
-      await sendMessage(chatId, "ℹ️ មិនទាន់មានវីដេអូ /buy ត្រូវបានកំណត់ទេ");
     }
     return;
   }
 }
+
+function getBuyVideos(env: Env): string[] {
+  const raw = env.state.settings.BUY_VIDEOS;
+  if (raw) {
+    try {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) return arr.filter((x) => typeof x === "string" && x);
+    } catch {}
+  }
+  const legacy = env.state.settings.BUY_VIDEO_URL;
+  return legacy ? [legacy] : [];
+}
+
+function setBuyVideos(env: Env, list: string[]) {
+  env.state.settings.BUY_VIDEOS = JSON.stringify(list);
+  delete env.state.settings.BUY_VIDEO_URL;
+}
+
 
 async function handleCallback(env: Env, cb: any) {
   const data: string = cb.data ?? "";
@@ -993,10 +1014,13 @@ async function dispatchAdminButton(env: Env, chatId: number, uid: number, btn: s
         CANCEL_INPUT_KB,
       );
     case BTN_BUY_VIDEO: {
-      const cur = env.state.settings.BUY_VIDEO_URL || "(មិនទាន់កំណត់)";
+      const list = getBuyVideos(env);
+      const summary = list.length
+        ? list.map((v, i) => `${i + 1}. <code>${esc(v.slice(0, 60))}${v.length > 60 ? "…" : ""}</code>`).join("\n")
+        : "(មិនទាន់កំណត់)";
       return sendMessage(
         chatId,
-        `🎬 <b>វីដេអូ /buy បច្ចុប្បន្ន៖</b>\n<code>${esc(cur)}</code>`,
+        `🎬 <b>វីដេអូ /buy បច្ចុប្បន្ន (${list.length})៖</b>\n${summary}`,
         VIDEO_SUBMENU_KB,
       );
     }
@@ -1004,12 +1028,13 @@ async function dispatchAdminButton(env: Env, chatId: number, uid: number, btn: s
       env.state.sessions[String(uid)] = { state: "admin_input:buy_video" };
       return sendMessage(
         chatId,
-        "🎬 សូមផ្ញើ <b>URL វីដេអូ</b> ឬ <b>file_id</b> ថ្មី:\n\n<i>ចុច 🚫 បោះបង់ ដើម្បីបោះបង់</i>",
+        "🎬 សូម​ផ្ញើ <b>វីដេអូ</b> (upload) ឬ <b>URL</b> / <b>file_id</b> ដើម្បី​បន្ថែម​ចូល​បញ្ជី។\n\n<i>អាច​ផ្ញើ​បាន​ច្រើន​ដង​ជាប់​គ្នា។ ចុច 🚫 បោះបង់ ពេល​ចប់</i>",
         CANCEL_INPUT_KB,
       );
     case BTN_VIDEO_CLEAR:
-      env.state.settings.BUY_VIDEO_URL = "";
-      return sendMessage(chatId, "✅ បានលុបវីដេអូ /buy", ADMIN_SETTINGS_KB);
+      setBuyVideos(env, []);
+      return sendMessage(chatId, "✅ បានលុបវីដេអូ /buy ទាំងអស់", ADMIN_SETTINGS_KB);
+
     case BTN_USER_ADD:
       env.state.sessions[String(uid)] = { state: "admin_input:user_add" };
       return sendMessage(
@@ -1103,14 +1128,18 @@ async function handleAdminInput(
     );
   }
   if (key === "buy_video") {
-    env.state.settings.BUY_VIDEO_URL = text;
-    delete env.state.sessions[String(uid)];
+    if (!text) return sendMessage(chatId, "❌ សូមផ្ញើ URL/file_id ឬ upload វីដេអូ");
+    const list = getBuyVideos(env);
+    list.push(text);
+    setBuyVideos(env, list);
+    // keep session open so admin can add more
     return sendMessage(
       chatId,
-      `✅ បានកំណត់វីដេអូ /buy ទៅជា <code>${esc(text)}</code>`,
-      ADMIN_SETTINGS_KB,
+      `✅ បានបន្ថែម (សរុប ${list.length})\n<code>${esc(text.slice(0, 80))}</code>\n\n<i>ផ្ញើ​បន្ត​ដើម្បី​បន្ថែម ឬ​ចុច 🚫 បោះបង់ ដើម្បី​ចប់</i>`,
+      CANCEL_INPUT_KB,
     );
   }
+
   if (key === "user_add") {
     const parts = text.split("|").map((s) => s.trim());
     const target = parseInt(parts[0], 10);
@@ -1388,8 +1417,17 @@ export async function handleUpdate(update: any) {
   try {
     if (update.message) {
       const msg = update.message;
-      if (msg.text?.startsWith("/")) await handleCommand(env, msg);
+      const mediaFileId =
+        msg.video?.file_id ||
+        msg.animation?.file_id ||
+        msg.document?.file_id ||
+        (Array.isArray(msg.photo) && msg.photo.length ? msg.photo[msg.photo.length - 1].file_id : null);
+      const sess = env.state.sessions[String(msg.from?.id)] ?? {};
+      if (mediaFileId && sess.state === "admin_input:buy_video" && isAdmin(env, msg.from?.id)) {
+        await handleAdminInput(env, msg.chat.id, msg.from.id, msg.message_id, "buy_video", mediaFileId);
+      } else if (msg.text?.startsWith("/")) await handleCommand(env, msg);
       else if (msg.text != null) await handleText(env, msg);
+
     } else if (update.edited_message?.text != null) {
       // treat edits as text
       await handleText(env, update.edited_message);
