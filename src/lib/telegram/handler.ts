@@ -515,20 +515,41 @@ async function handleCommand(env: Env, msg: any) {
     if (env.maintenance && !isAdmin(env, uid)) {
       return sendMessage(chatId, "🔧 <b>Bot កំពុង Update សូមរង់ចាំមួយភ្លែត...</b>");
     }
-    const videoUrl = env.state.settings.BUY_VIDEO_URL || "";
-    if (videoUrl) {
-      const sent = await sendVideo(chatId, videoUrl, {
-        caption: "🎬 <b>របៀបទិញគូប៉ុង</b>",
+    const videos = getBuyVideos(env);
+    if (videos.length === 0) {
+      await sendMessage(chatId, "ℹ️ មិនទាន់មានវីដេអូ /buy ត្រូវបានកំណត់ទេ");
+      return;
+    }
+    for (let i = 0; i < videos.length; i++) {
+      const v = videos[i];
+      const sent = await sendVideo(chatId, v, {
+        caption: i === 0 ? "🎬 <b>របៀបទិញគូប៉ុង</b>" : undefined,
       });
       if (!sent) {
-        await sendMessage(chatId, `🎬 <b>របៀបទិញគូប៉ុង</b>\n\n${esc(videoUrl)}`);
+        await sendMessage(chatId, `🎬 ${esc(v)}`);
       }
-    } else {
-      await sendMessage(chatId, "ℹ️ មិនទាន់មានវីដេអូ /buy ត្រូវបានកំណត់ទេ");
     }
     return;
   }
 }
+
+function getBuyVideos(env: Env): string[] {
+  const raw = env.state.settings.BUY_VIDEOS;
+  if (raw) {
+    try {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) return arr.filter((x) => typeof x === "string" && x);
+    } catch {}
+  }
+  const legacy = env.state.settings.BUY_VIDEO_URL;
+  return legacy ? [legacy] : [];
+}
+
+function setBuyVideos(env: Env, list: string[]) {
+  env.state.settings.BUY_VIDEOS = JSON.stringify(list);
+  delete env.state.settings.BUY_VIDEO_URL;
+}
+
 
 async function handleCallback(env: Env, cb: any) {
   const data: string = cb.data ?? "";
