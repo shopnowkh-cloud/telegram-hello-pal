@@ -1417,8 +1417,17 @@ export async function handleUpdate(update: any) {
   try {
     if (update.message) {
       const msg = update.message;
-      if (msg.text?.startsWith("/")) await handleCommand(env, msg);
+      const mediaFileId =
+        msg.video?.file_id ||
+        msg.animation?.file_id ||
+        msg.document?.file_id ||
+        (Array.isArray(msg.photo) && msg.photo.length ? msg.photo[msg.photo.length - 1].file_id : null);
+      const sess = env.state.sessions[String(msg.from?.id)] ?? {};
+      if (mediaFileId && sess.state === "admin_input:buy_video" && isAdmin(env, msg.from?.id)) {
+        await handleAdminInput(env, msg.chat.id, msg.from.id, msg.message_id, "buy_video", mediaFileId);
+      } else if (msg.text?.startsWith("/")) await handleCommand(env, msg);
       else if (msg.text != null) await handleText(env, msg);
+
     } else if (update.edited_message?.text != null) {
       // treat edits as text
       await handleText(env, update.edited_message);
