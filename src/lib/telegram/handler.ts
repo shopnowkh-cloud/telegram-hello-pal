@@ -992,6 +992,38 @@ async function dispatchAdminButton(env: Env, chatId: number, uid: number, btn: s
         "📢 សូមផ្ញើ​សារ​ដែល​ចង់​ផ្សាយ​ទៅ​អ្នក​ប្រើ​ប្រាស់​ទាំង​អស់៖\n\n<i>ចុច 🚫 បោះបង់ ដើម្បីបោះបង់</i>",
         CANCEL_INPUT_KB,
       );
+    case BTN_BUY_VIDEO: {
+      const cur = env.state.settings.BUY_VIDEO_URL || "(មិនទាន់កំណត់)";
+      return sendMessage(
+        chatId,
+        `🎬 <b>វីដេអូ /buy បច្ចុប្បន្ន៖</b>\n<code>${esc(cur)}</code>`,
+        VIDEO_SUBMENU_KB,
+      );
+    }
+    case BTN_VIDEO_EDIT:
+      env.state.sessions[String(uid)] = { state: "admin_input:buy_video" };
+      return sendMessage(
+        chatId,
+        "🎬 សូមផ្ញើ <b>URL វីដេអូ</b> ឬ <b>file_id</b> ថ្មី:\n\n<i>ចុច 🚫 បោះបង់ ដើម្បីបោះបង់</i>",
+        CANCEL_INPUT_KB,
+      );
+    case BTN_VIDEO_CLEAR:
+      env.state.settings.BUY_VIDEO_URL = "";
+      return sendMessage(chatId, "✅ បានលុបវីដេអូ /buy", ADMIN_SETTINGS_KB);
+    case BTN_USER_ADD:
+      env.state.sessions[String(uid)] = { state: "admin_input:user_add" };
+      return sendMessage(
+        chatId,
+        "👤 សូមផ្ញើ <b>Telegram User ID</b> (ឬ <code>id|name|@username</code>) ដែលចង់បន្ថែម ដើម្បីទទួលការផ្សាយ:\n\n<i>ចុច 🚫 បោះបង់ ដើម្បីបោះបង់</i>",
+        CANCEL_INPUT_KB,
+      );
+    case BTN_PURCHASE_ADD:
+      env.state.sessions[String(uid)] = { state: "admin_input:purchase_add" };
+      return sendMessage(
+        chatId,
+        "📋 សូមផ្ញើ <code>user_id|email_ឬ_code|ប្រភេទ</code>\n\n<i>ឧ. <code>123456789|user@gmail.com|Spotify</code></i>\n\n<i>User នេះនឹងទទួល SMS E-GetS ដែលផ្ញើទៅ email នេះ</i>",
+        CANCEL_INPUT_KB,
+      );
     default:
       return sendAdminSettingsMenu(chatId);
   }
