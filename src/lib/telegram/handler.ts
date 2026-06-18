@@ -1371,7 +1371,18 @@ async function handleChannelPost(env: Env, post: any) {
 }
 
 // ---------- entry points ----------
+let _commandsRegistered = false;
+async function ensureBotCommands() {
+  if (_commandsRegistered) return;
+  _commandsRegistered = true;
+  await setMyCommands([
+    { command: "start", description: "ចាប់ផ្តើម" },
+    { command: "buy", description: "ទិញគូប៉ុង" },
+  ]);
+}
+
 export async function handleUpdate(update: any) {
+  ensureBotCommands().catch(() => {});
   const state = await loadState();
   const env = envFromState(state);
   try {
