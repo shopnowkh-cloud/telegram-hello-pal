@@ -20,6 +20,8 @@ import {
   sendDocument,
   sendMessage,
   sendPhoto,
+  sendVideo,
+  setMyCommands,
 } from "./tg";
 
 // ---------- constants ----------
