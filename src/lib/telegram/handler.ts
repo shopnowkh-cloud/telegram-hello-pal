@@ -1102,6 +1102,74 @@ async function handleAdminInput(
       BROADCAST_CONFIRM_KB,
     );
   }
+  if (key === "buy_video") {
+    env.state.settings.BUY_VIDEO_URL = text;
+    delete env.state.sessions[String(uid)];
+    return sendMessage(
+      chatId,
+      `✅ បានកំណត់វីដេអូ /buy ទៅជា <code>${esc(text)}</code>`,
+      ADMIN_SETTINGS_KB,
+    );
+  }
+  if (key === "user_add") {
+    const parts = text.split("|").map((s) => s.trim());
+    const target = parseInt(parts[0], 10);
+    if (isNaN(target))
+      return sendMessage(chatId, "❌ user_id ត្រូវតែជាលេខ (ឬចុច 🚫 បោះបង់)");
+    const nameRaw = parts[1] || "";
+    const uname = (parts[2] || "").replace(/^@/, "");
+    const [first_name = "", ...rest] = nameRaw.split(/\s+/).filter(Boolean);
+    env.state.users[String(target)] = {
+      first_name,
+      last_name: rest.join(" "),
+      username: uname,
+      first_seen: new Date().toISOString(),
+    };
+    delete env.state.sessions[String(uid)];
+    return sendMessage(
+      chatId,
+      `✅ បានបន្ថែម User <code>${target}</code> (${esc(nameRaw || "—")}) ទៅក្នុងបញ្ជី`,
+      ADMIN_SETTINGS_KB,
+    );
+  }
+  if (key === "purchase_add") {
+    const parts = text.split("|").map((s) => s.trim());
+    if (parts.length < 2)
+      return sendMessage(
+        chatId,
+        "❌ ទម្រង់ខុស។ សូមផ្ញើ <code>user_id|email_ឬ_code|ប្រភេទ</code>",
+      );
+    const target = parseInt(parts[0], 10);
+    const ident = parts[1];
+    const accType = parts[2] || "Manual";
+    if (isNaN(target) || !ident)
+      return sendMessage(chatId, "❌ ទម្រង់ខុស (ឬចុច 🚫 បោះបង់)");
+    const accItem: AccountItem = ident.includes("@")
+      ? { email: ident }
+      : { code: ident };
+    env.state.purchases.push({
+      user_id: target,
+      account_type: accType,
+      quantity: 1,
+      total_price: 0,
+      accounts: [accItem],
+      purchased_at: new Date().toISOString(),
+    });
+    if (!env.state.users[String(target)]) {
+      env.state.users[String(target)] = {
+        first_name: "",
+        last_name: "",
+        username: "",
+        first_seen: new Date().toISOString(),
+      };
+    }
+    delete env.state.sessions[String(uid)];
+    return sendMessage(
+      chatId,
+      `✅ បានភ្ជាប់ <code>${esc(ident)}</code> ទៅ User <code>${target}</code>\n\nUser នេះនឹងទទួល SMS E-GetS ពេលផ្ញើទៅ email នេះ`,
+      ADMIN_SETTINGS_KB,
+    );
+  }
 }
 
 async function runBroadcast(env: Env, adminChatId: number, bcastText: string) {
