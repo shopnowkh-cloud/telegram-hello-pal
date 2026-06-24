@@ -93,7 +93,7 @@ const ADMIN_BUTTON_LABELS = new Set([
 ]);
 
 const USER_KB = Markup.keyboard([[BTN_BUY], [BTN_HOWTO, BTN_HISTORY]]);
-const ADMIN_KB = Markup.keyboard([[BTN_BUY], [BTN_HOWTO, BTN_HISTORY], [ADMIN_SETTINGS_BTN]]);
+const ADMIN_KB = Markup.keyboard([[BTN_BUY], [BTN_HOWTO, BTN_HISTORY]]);
 const ADMIN_SETTINGS_KB = {
   reply_markup: {
     keyboard: [
@@ -513,12 +513,11 @@ async function handleCommand(env: Env, msg: any) {
       );
     }
     delete env.state.sessions[String(uid)];
-    await sendMessage(
+    return sendMessage(
       chatId,
-      "👋 <b>សូមស្វាគមន៍!</b>\n\nសូមជ្រើសរើសប្រតិបត្តិការខាងក្រោម៖",
+      "👋 <b>សូមស្វាគមន៍!</b>\n\nសូមជ្រើសរើសប្រតិបត្តិការខាងក្រោម៖\n\n• 💵 ទិញគូប៉ុង\n• 📖 របៀបទិញ\n• 📋 ប្រវត្តិទិញ",
       mainKb(env, uid),
     );
-    return showAccountSelection(env, chatId);
   }
 }
 
@@ -913,7 +912,11 @@ async function handleText(env: Env, msg: any) {
       "⏳ <b>សូមបញ្ចប់ការទូទាត់ QR ជាមុនសិន</b>\nឬចុច <b>🚫 បោះបង់</b> ដើម្បីបោះបង់",
       CHECK_PAYMENT_INLINE,
     );
-  await showAccountSelection(env, chatId);
+  await sendMessage(
+    chatId,
+    "❓ <b>ពាក្យបញ្ជាមិនត្រឹមត្រូវ</b>\n\nសូមជ្រើសរើសប្រតិបត្តិការខាងក្រោម៖",
+    mainKb(env, uid),
+  );
 }
 
 async function dispatchAdminButton(env: Env, chatId: number, uid: number, btn: string) {
