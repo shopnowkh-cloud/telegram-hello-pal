@@ -513,28 +513,12 @@ async function handleCommand(env: Env, msg: any) {
       );
     }
     delete env.state.sessions[String(uid)];
+    await sendMessage(
+      chatId,
+      "👋 <b>សូមស្វាគមន៍!</b>\n\nសូមជ្រើសរើសប្រតិបត្តិការខាងក្រោម៖",
+      mainKb(env, uid),
+    );
     return showAccountSelection(env, chatId);
-  }
-  if (text === "/buy" || text.startsWith("/buy ")) {
-    await notifyAdminNewUser(env, msg.from);
-    if (env.maintenance && !isAdmin(env, uid)) {
-      return sendMessage(chatId, "🔧 <b>Bot កំពុង Update សូមរង់ចាំមួយភ្លែត...</b>");
-    }
-    const videos = getBuyVideos(env);
-    if (videos.length === 0) {
-      await sendMessage(chatId, "ℹ️ មិនទាន់មានវីដេអូ /buy ត្រូវបានកំណត់ទេ");
-      return;
-    }
-    for (let i = 0; i < videos.length; i++) {
-      const v = videos[i];
-      const sent = await sendVideo(chatId, v, {
-        caption: i === 0 ? "🎬 <b>របៀបទិញគូប៉ុង</b>" : undefined,
-      });
-      if (!sent) {
-        await sendMessage(chatId, `🎬 ${esc(v)}`);
-      }
-    }
-    return;
   }
 }
 
