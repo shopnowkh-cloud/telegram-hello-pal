@@ -877,7 +877,7 @@ async function handleText(env: Env, msg: any) {
     if (ADMIN_BUTTON_LABELS.has(text)) return dispatchAdminButton(env, chatId, uid, text);
   }
 
-  if (text === "💵 ទិញគូប៉ុង") {
+  if (text === BTN_BUY) {
     const sess = env.state.sessions[String(uid)];
     if (sess?.state === "payment_pending")
       return sendMessage(
@@ -886,6 +886,25 @@ async function handleText(env: Env, msg: any) {
       );
     delete env.state.sessions[String(uid)];
     return showAccountSelection(env, chatId);
+  }
+
+  if (text === BTN_HOWTO) {
+    const videos = getBuyVideos(env);
+    if (videos.length === 0) {
+      return sendMessage(chatId, "ℹ️ មិនទាន់មានវីដេអូបង្ហាញនៅឡើយទេ", mainKb(env, uid));
+    }
+    for (let i = 0; i < videos.length; i++) {
+      const v = videos[i];
+      const sent = await sendVideo(chatId, v, {
+        caption: i === 0 ? "🎬 <b>របៀបទិញគូប៉ុង</b>" : undefined,
+      });
+      if (!sent) await sendMessage(chatId, `🎬 ${esc(v)}`);
+    }
+    return;
+  }
+
+  if (text === BTN_HISTORY) {
+    return showUserHistory(env, chatId, uid);
   }
 
   if (env.state.sessions[String(uid)]?.state === "payment_pending")
