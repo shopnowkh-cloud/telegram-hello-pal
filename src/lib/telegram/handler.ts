@@ -513,12 +513,11 @@ async function handleCommand(env: Env, msg: any) {
       );
     }
     delete env.state.sessions[String(uid)];
-    await sendMessage(
+    return sendMessage(
       chatId,
-      "👋 <b>សូមស្វាគមន៍!</b>\n\nសូមជ្រើសរើសប្រតិបត្តិការខាងក្រោម៖",
+      "👋 <b>សូមស្វាគមន៍!</b>\n\nសូមជ្រើសរើសប្រតិបត្តិការខាងក្រោម៖\n\n• 💵 ទិញគូប៉ុង\n• 📖 របៀបទិញ\n• 📋 ប្រវត្តិទិញ",
       mainKb(env, uid),
     );
-    return showAccountSelection(env, chatId);
   }
 }
 
