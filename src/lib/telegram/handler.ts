@@ -97,55 +97,56 @@ const USER_KB = Markup.keyboard([
   [{ text: BTN_HOWTO, style: "success" }, { text: BTN_HISTORY, style: "primary" }],
 ] as any);
 const ADMIN_KB = USER_KB;
+// Bot API 9.4 keyboard button styles: success | primary | danger | default
 const ADMIN_SETTINGS_KB = {
   reply_markup: {
     keyboard: [
-      [{ text: BTN_ADD_ACCOUNT }, { text: BTN_DELETE_TYPE }],
-      [{ text: BTN_STOCK }, { text: BTN_BUYERS }],
-      [{ text: BTN_USERS }, { text: BTN_KHPAY }],
-      [{ text: BTN_CHANNEL }, { text: BTN_ADMINS }],
-      [{ text: BTN_BROADCAST }, { text: BTN_BUY_VIDEO }],
-      [{ text: BTN_MAINTENANCE }],
+      [{ text: BTN_ADD_ACCOUNT, style: "success" }, { text: BTN_DELETE_TYPE, style: "danger" }],
+      [{ text: BTN_STOCK, style: "primary" }, { text: BTN_BUYERS, style: "primary" }],
+      [{ text: BTN_USERS, style: "primary" }, { text: BTN_KHPAY, style: "default" }],
+      [{ text: BTN_CHANNEL, style: "default" }, { text: BTN_ADMINS, style: "default" }],
+      [{ text: BTN_BROADCAST, style: "success" }, { text: BTN_BUY_VIDEO, style: "success" }],
+      [{ text: BTN_MAINTENANCE, style: "danger" }],
     ],
     resize_keyboard: true,
     is_persistent: true,
   },
 };
-const CANCEL_INPUT_KB = Markup.keyboard([[BTN_CANCEL_INPUT]]);
-const ADD_ACCOUNT_KB = Markup.keyboard([[BTN_BACK_SETTINGS]]);
-const BACK_SETTINGS_KB = Markup.keyboard([[BTN_BACK_SETTINGS]]);
+const CANCEL_INPUT_KB = Markup.keyboard([[{ text: BTN_CANCEL_INPUT, style: "danger" }]] as any);
+const ADD_ACCOUNT_KB = Markup.keyboard([[{ text: BTN_BACK_SETTINGS, style: "default" }]] as any);
+const BACK_SETTINGS_KB = Markup.keyboard([[{ text: BTN_BACK_SETTINGS, style: "default" }]] as any);
 const KHPAY_SUBMENU_KB = Markup.keyboard([
-  [BTN_KHPAY_KEY_EDIT, BTN_KHPAY_INFO],
-  [BTN_BACK_SETTINGS],
-]);
+  [{ text: BTN_KHPAY_KEY_EDIT, style: "success" }, { text: BTN_KHPAY_INFO, style: "primary" }],
+  [{ text: BTN_BACK_SETTINGS, style: "default" }],
+] as any);
 const CHANNEL_SUBMENU_KB = Markup.keyboard([
-  [BTN_CHANNEL_EDIT, BTN_CHANNEL_CLEAR],
-  [BTN_BACK_SETTINGS],
-]);
+  [{ text: BTN_CHANNEL_EDIT, style: "success" }, { text: BTN_CHANNEL_CLEAR, style: "danger" }],
+  [{ text: BTN_BACK_SETTINGS, style: "default" }],
+] as any);
 const ADMINS_SUBMENU_KB = Markup.keyboard([
-  [BTN_ADMIN_ADD, BTN_ADMIN_REMOVE],
-  [BTN_BACK_SETTINGS],
-]);
+  [{ text: BTN_ADMIN_ADD, style: "success" }, { text: BTN_ADMIN_REMOVE, style: "danger" }],
+  [{ text: BTN_BACK_SETTINGS, style: "default" }],
+] as any);
 const MAINTENANCE_SUBMENU_KB = Markup.keyboard([
-  [BTN_MAINT_ON, BTN_MAINT_OFF],
-  [BTN_BACK_SETTINGS],
-]);
+  [{ text: BTN_MAINT_ON, style: "danger" }, { text: BTN_MAINT_OFF, style: "success" }],
+  [{ text: BTN_BACK_SETTINGS, style: "default" }],
+] as any);
 const VIDEO_SUBMENU_KB = Markup.keyboard([
-  [BTN_VIDEO_EDIT, BTN_VIDEO_CLEAR],
-  [BTN_BACK_SETTINGS],
-]);
+  [{ text: BTN_VIDEO_EDIT, style: "success" }, { text: BTN_VIDEO_CLEAR, style: "danger" }],
+  [{ text: BTN_BACK_SETTINGS, style: "default" }],
+] as any);
 const USERS_SUBMENU_KB = Markup.keyboard([
-  [BTN_USER_ADD],
-  [BTN_BACK_SETTINGS],
-]);
+  [{ text: BTN_USER_ADD, style: "success" }],
+  [{ text: BTN_BACK_SETTINGS, style: "default" }],
+] as any);
 const BUYERS_SUBMENU_KB = Markup.keyboard([
-  [BTN_PURCHASE_ADD],
-  [BTN_BACK_SETTINGS],
-]);
+  [{ text: BTN_PURCHASE_ADD, style: "success" }],
+  [{ text: BTN_BACK_SETTINGS, style: "default" }],
+] as any);
 const BROADCAST_CONFIRM_KB = Markup.keyboard([
-  [BTN_BROADCAST_CONFIRM],
-  [BTN_BROADCAST_CANCEL],
-]);
+  [{ text: BTN_BROADCAST_CONFIRM, style: "success" }],
+  [{ text: BTN_BROADCAST_CANCEL, style: "danger" }],
+] as any);
 const CHECK_PAYMENT_INLINE = {
   reply_markup: Markup.inlineKeyboard([[
     Markup.button.callback("🚫 បោះបង់", "cancel_purchase"),
