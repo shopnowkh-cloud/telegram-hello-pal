@@ -79,6 +79,8 @@ const BTN_THEME_SUCCESS = "🟢 Success";
 const BTN_THEME_PRIMARY = "🔵 Primary";
 const BTN_THEME_DANGER = "🔴 Danger";
 const BTN_THEME_DEFAULT = "⚪ Default";
+const BTN_THEME_PER = "✏️ ប៊ូតុងនីមួយៗ";
+const BTN_RESET_BTN_COLOR = "♻️ Reset (ប្រើ theme)";
 const ADMIN_SETTINGS_BTN = "/settings";
 
 // ---- User-facing buttons ----
