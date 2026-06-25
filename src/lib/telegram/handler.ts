@@ -1028,6 +1028,30 @@ async function dispatchAdminButton(env: Env, chatId: number, uid: number, btn: s
         "➖ សូមផ្ញើ <b>Telegram User ID</b> ដែលចង់ដក:",
         CANCEL_INPUT_KB(),
       );
+    case BTN_THEME: {
+      const cur = activeTheme;
+      return sendMessage(
+        chatId,
+        `🎨 <b>ពណ៌ប៊ូតុង /settings</b>\n\nបច្ចុប្បន្ន៖ <code>${cur}</code>\n\nជ្រើសរើស color scheme៖`,
+        THEME_SUBMENU_KB(),
+      );
+    }
+    case BTN_THEME_AUTO:
+    case BTN_THEME_SUCCESS:
+    case BTN_THEME_PRIMARY:
+    case BTN_THEME_DANGER:
+    case BTN_THEME_DEFAULT: {
+      const map: Record<string, ThemeMode> = {
+        [BTN_THEME_AUTO]: "auto",
+        [BTN_THEME_SUCCESS]: "success",
+        [BTN_THEME_PRIMARY]: "primary",
+        [BTN_THEME_DANGER]: "danger",
+        [BTN_THEME_DEFAULT]: "default",
+      };
+      activeTheme = map[btn];
+      env.state.settings.BUTTON_THEME = activeTheme;
+      return sendMessage(chatId, `✅ បានកំណត់ពណ៌៖ <code>${activeTheme}</code>`, ADMIN_SETTINGS_KB());
+    }
     case BTN_MAINTENANCE: {
       const status = env.maintenance ? "🔴 បិទ" : "🟢 បើក";
       return sendMessage(
