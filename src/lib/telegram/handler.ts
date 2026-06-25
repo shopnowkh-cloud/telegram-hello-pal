@@ -1192,6 +1192,41 @@ async function handleAdminInput(
     delete env.state.sessions[String(uid)];
     return sendAdminSettingsMenu(chatId);
   }
+  if (key === "btn_style_pick") {
+    if (!CUSTOMIZABLE_BUTTONS.includes(text)) {
+      return sendMessage(chatId, "❌ សូមជ្រើសប៊ូតុង​ពី​ក្តារ​ខាងក្រោម", PER_BUTTON_PICK_KB());
+    }
+    env.state.sessions[String(uid)] = { state: `admin_input:btn_style_color:${text}` };
+    const cur = buttonStyles[text] ?? "(theme)";
+    return sendMessage(
+      chatId,
+      `🎨 ប៊ូតុង៖ <b>${esc(text)}</b>\nបច្ចុប្បន្ន៖ <code>${cur}</code>\n\nជ្រើស​ពណ៌​ថ្មី៖`,
+      COLOR_PICK_KB(),
+    );
+  }
+  if (key.startsWith("btn_style_color:")) {
+    const label = key.slice("btn_style_color:".length);
+    const colorMap: Record<string, BtnStyle> = {
+      [BTN_THEME_SUCCESS]: "success",
+      [BTN_THEME_PRIMARY]: "primary",
+      [BTN_THEME_DANGER]: "danger",
+      [BTN_THEME_DEFAULT]: "default",
+    };
+    if (text === BTN_RESET_BTN_COLOR) {
+      delete buttonStyles[label];
+    } else if (colorMap[text]) {
+      buttonStyles[label] = colorMap[text];
+    } else {
+      return sendMessage(chatId, "❌ សូមជ្រើស​ពណ៌​ពី​ក្តារ​ខាងក្រោម", COLOR_PICK_KB());
+    }
+    env.state.settings.BUTTON_STYLES = JSON.stringify(buttonStyles);
+    delete env.state.sessions[String(uid)];
+    return sendMessage(
+      chatId,
+      `✅ បានកំណត់​ពណ៌​សម្រាប់ <b>${esc(label)}</b> → <code>${buttonStyles[label] ?? "theme"}</code>`,
+      ADMIN_SETTINGS_KB(),
+    );
+  }
   if (key === "khpay_key") {
     if (!text)
       return sendMessage(
