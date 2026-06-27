@@ -303,20 +303,28 @@ function formatAccount(acc: AccountItem): string {
   return JSON.stringify(acc);
 }
 
-// ---------- Cambo / KhPay ----------
-async function camboRequest(env: Env, params: Record<string, string | number>) {
-  const qs = new URLSearchParams({
-    ...Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)])),
-    api_token: env.camboToken,
-  }).toString();
-  const res = await fetch(`${CAMBO_BASE}/?${qs}`, {
-    signal: AbortSignal.timeout(12000),
+// ---------- KhPay ----------
+async function khpayRequest(
+  env: Env,
+  method: "GET" | "POST",
+  path: string,
+  body?: Record<string, any>,
+) {
+  const res = await fetch(`${KHPAY_BASE}${path}`, {
+    method,
+    headers: {
+      Authorization: `Bearer ${env.camboToken}`,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: body ? JSON.stringify(body) : undefined,
+    signal: AbortSignal.timeout(15000),
   });
   const text = await res.text();
   try {
     return JSON.parse(text);
   } catch {
-    return { success: false, error: text };
+    return { success: false, error: text || `HTTP ${res.status}` };
   }
 }
 
@@ -332,19 +340,23 @@ async function generatePlainQR(qr_string: string): Promise<Uint8Array> {
 
 async function createKhpayPayment(env: Env, amount: number) {
   try {
-    const res = await camboRequest(env, { type: "generate_qr", amount });
-    if (res.status !== "success" || !res.data) {
+    const res = await khpayRequest(env, "POST", "/qr/generate", {
+      amount: amount.toFixed(2),
+      currency: "USD",
+      note: "Telegram Bot Order",
+    });
+    if (!res?.success || !res?.data) {
       return {
         imgBuffer: null as Uint8Array | null,
         transaction_id: null as string | null,
         md5: null as string | null,
-        error: res.message || res.error || "API error",
+        error: res?.error || res?.message || "KhPay API error",
       };
     }
     const d = res.data;
-    const md5 = d.md5 || null;
-    const qr_string = d.qr || "";
-    const imgUrl = d.Url_qr_code || null;
+    const transaction_id: string | null = d.transaction_id || null;
+    const qr_string: string = d.qr_string || "";
+    const imgUrl: string | null = d.download_qr || null;
     let imgBuffer: Uint8Array | null = null;
     if (imgUrl) {
       try {
@@ -352,14 +364,15 @@ async function createKhpayPayment(env: Env, amount: number) {
         if (r.ok) imgBuffer = new Uint8Array(await r.arrayBuffer());
         else throw new Error(`HTTP ${r.status}`);
       } catch {
-        imgBuffer = await generatePlainQR(qr_string);
+        if (qr_string) imgBuffer = await generatePlainQR(qr_string);
       }
     } else if (qr_string) {
       imgBuffer = await generatePlainQR(qr_string);
-    } else {
+    }
+    if (!imgBuffer || !transaction_id) {
       return { imgBuffer: null, transaction_id: null, md5: null, error: "No QR data returned" };
     }
-    return { imgBuffer, transaction_id: md5, md5, error: null as string | null };
+    return { imgBuffer, transaction_id, md5: null as string | null, error: null as string | null };
   } catch (e) {
     return {
       imgBuffer: null,
@@ -373,15 +386,23 @@ async function createKhpayPayment(env: Env, amount: number) {
 export async function checkKhpayStatus(
   env: Env,
   transaction_id: string,
-  md5: string | null = null,
+  _md5: string | null = null,
 ) {
   try {
-    const checkMd5 = md5 || transaction_id;
-    const data = await camboRequest(env, { type: "check_md5", md5: checkMd5 });
-    const status = String(data?.status ?? "").toLowerCase();
+    const data = await khpayRequest(
+      env,
+      "GET",
+      `/qr/check/${encodeURIComponent(transaction_id)}`,
+    );
+    const d = data?.data ?? data;
+    const status = String(d?.status ?? "").toLowerCase();
     const isPaid =
-      status === "paid" || status === "success" || status === "completed";
-    return { paid: isPaid, status: status || "pending", data };
+      data?.success !== false &&
+      (status === "paid" ||
+        status === "success" ||
+        status === "completed" ||
+        d?.paid === true);
+    return { paid: isPaid, status: status || "pending", data: d };
   } catch (e) {
     console.warn("[WARN] checkKhpayStatus:", (e as Error).message);
     return { paid: false, status: "error", data: null };
