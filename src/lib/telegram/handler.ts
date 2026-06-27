@@ -255,8 +255,11 @@ function envFromState(state: BotState): Env {
     state,
     extraAdmins: extras,
     channelId: state.settings.TELEGRAM_CHANNEL_ID || process.env.CHANNEL_ID || "",
-    camboToken:
-      state.settings.CAMBO_API_TOKEN || process.env.KHPAY_API_TOKEN || process.env.CAMBO_API_TOKEN || DEFAULT_KHPAY_TOKEN,
+    camboToken: (() => {
+      const stored = state.settings.CAMBO_API_TOKEN || "";
+      if (stored.startsWith("ak_")) return stored;
+      return process.env.KHPAY_API_TOKEN || DEFAULT_KHPAY_TOKEN;
+    })(),
     maintenance: state.settings.MAINTENANCE_MODE === "true",
   };
 }
