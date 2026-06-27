@@ -26,7 +26,8 @@ import {
 
 // ---------- constants ----------
 const ADMIN_ID = Number(process.env.ADMIN_ID || "5002402843");
-const CAMBO_BASE = "https://bakong.cambo-kh.com/api/v1";
+const KHPAY_BASE = "https://khpay.site/api/v1";
+const DEFAULT_KHPAY_TOKEN = "ak_5de3149200e549b740b513233fa2a90930f8d2efadabcd92";
 const PAYMENT_TIMEOUT_SEC = 60;
 export const PAYMENT_POLL_INTERVAL = 5;
 
